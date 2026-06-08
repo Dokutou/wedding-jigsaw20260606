@@ -350,11 +350,13 @@ function bezPts(p0,p1,p2,p3,n){
   return out;
 }
 // (x0,y0)->(x1,y1) のエッジ点列。flip:0=直線, ±1=タブ方向（左法線基準）
-function edgePoints(x0,y0,x1,y1,flip){
+// along(u)は辺長Lの割合、perp(p)はタブ深さ tab の割合（独立）。
+// これにより縦長セルでも凹凸がセルをはみ出さず、自己交差を防ぐ。
+function edgePoints(x0,y0,x1,y1,flip,tab){
   if(flip===0) return [[x1,y1]];
   const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy);
   const ux=dx/L, uy=dy/L, nx=-uy, ny=ux, s=flip;
-  const P=(u,p)=>[ x0+ux*u*L+nx*p*L*s, y0+uy*u*L+ny*p*L*s ];
+  const P=(u,p)=>[ x0+ux*u*L+nx*p*tab*s, y0+uy*u*L+ny*p*tab*s ];
   let pts=[ P(0.35,0) ];
   pts=pts.concat( bezPts(P(0.35,0),P(0.40,0.0),P(0.38,0.13),P(0.42,0.18),8) );
   pts=pts.concat( bezPts(P(0.42,0.18),P(0.30,0.42),P(0.70,0.42),P(0.58,0.18),12) );
@@ -378,6 +380,7 @@ function newPuzzle(){
 
 function buildPieces(){
   pieces=[]; zorder=[];
+  const tab = Math.min(cellW, cellH) * 0.82;   // 凹凸の深さ（短辺基準で一定）
   for(let r=0;r<ROWS;r++){
     for(let c=0;c<COLS;c++){
       const hx=c*cellW, hy=r*cellH;     // board-local の左上
@@ -387,10 +390,10 @@ function buildPieces(){
       const rig = (c===COLS-1)?0:vEdge[r][c];
       // 4辺を時計回りに連結
       let pts=[[hx,hy]];
-      pts=pts.concat(edgePoints(hx,hy, hx+cellW,hy, top));
-      pts=pts.concat(edgePoints(hx+cellW,hy, hx+cellW,hy+cellH, rig));
-      pts=pts.concat(edgePoints(hx+cellW,hy+cellH, hx,hy+cellH, bot));
-      pts=pts.concat(edgePoints(hx,hy+cellH, hx,hy, lef));
+      pts=pts.concat(edgePoints(hx,hy, hx+cellW,hy, top, tab));
+      pts=pts.concat(edgePoints(hx+cellW,hy, hx+cellW,hy+cellH, rig, tab));
+      pts=pts.concat(edgePoints(hx+cellW,hy+cellH, hx,hy+cellH, bot, tab));
+      pts=pts.concat(edgePoints(hx,hy+cellH, hx,hy, lef, tab));
       const path=new Path2D();
       path.moveTo(pts[0][0],pts[0][1]);
       for(let i=1;i<pts.length;i++) path.lineTo(pts[i][0],pts[i][1]);
@@ -467,7 +470,9 @@ function pointFromEvt(e){
   return [ e.clientX-r.left, e.clientY-r.top ];
 }
 function hit(mx,my){
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  // 当たり判定はCSSピクセル空間で行う（高解像度端末でのズレ防止）。
+  // 描画はframe()内でscale(dpr)に戻すため影響なし。
+  ctx.setTransform(1,0,0,1,0,0);
   for(let i=zorder.length-1;i>=0;i--){
     const p=zorder[i];
     if(ctx.isPointInPath(p.path, mx-(BX+p.ox), my-(BY+p.oy))) return p;
