@@ -226,7 +226,7 @@
     </div>
     <div id="controls">
       <div id="timer"><span class="ti">&#9201;</span><span id="tClock">00:00</span></div>
-      <div id="progress"><b id="pNow">0</b> / <span id="pAll">100</span></div>
+      <div id="progress"><b id="pNow">0</b> / <span id="pAll">30</span></div>
       <button class="btn icon on" id="btnBgm" title="BGM">&#9834; BGM</button>
       <button class="btn" id="btnGuide">ガイド</button>
       <button class="btn" id="btnShuffle">シャッフル</button>
@@ -260,9 +260,7 @@
       <span class="cover-name" id="vName2">佳乃子</span>
     </div>
     <div class="diffs" id="diffs">
-      <div class="diff" data-c="5" data-r="6"><div class="d-t">やさしい</div><div class="d-n">30 pieces</div></div>
-      <div class="diff" data-c="7" data-r="9"><div class="d-t">ふつう</div><div class="d-n">63 pieces</div></div>
-      <div class="diff sel" data-c="10" data-r="10"><div class="d-t">ほんき</div><div class="d-n">100 pieces</div></div>
+      <div class="diff sel" data-c="5" data-r="6"><div class="d-t">やさしい</div><div class="d-n">30 pieces</div></div>
     </div>
     <button class="start" id="btnStart">パズルを始める</button>
     <div class="lead">完成したピースの中では、思い出の映像が静かに流れ続けます。<br>すべてを組み上げたとき、音とともにあの日がよみがえります。</div>
@@ -316,7 +314,7 @@ function tryPlay(){ const p=vid.play(); if(p&&p.catch) p.catch(()=>{}); }
 
 const VW = 540, VH = 960;            // 動画ネイティブ解像度（埋め込み済み）
 const ASPECT = VW/VH;
-let COLS = 10, ROWS = 10;
+let COLS = 5, ROWS = 6;   // やさしい（30ピース）固定
 
 let dpr = Math.min(window.devicePixelRatio||1, 2);
 let W=0, H=0;                        // CSSピクセルのキャンバスサイズ
